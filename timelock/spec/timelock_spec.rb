@@ -24,11 +24,11 @@ describe "Timelock" do
     let(:known_answers) { {:input => 'abc', :output => 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad'}}
 
     it 'should produce known answer for single iteation' do
-      extend Utils
-      generator = SHA256Puzzle.new({:iterations => 1})
-      generator.generate(known_answers[:input])
-      known_answers[:input].should == generator.puzzle[:seed][0]
-      known_answers[:output].should == bin_to_hex(generator.key)
+ 
+      known_answer_test 1     
+      known_answer_test 2    
+      known_answer_test 4    
+      
     end
 
     it 'should solve the puzzle' do
@@ -40,4 +40,16 @@ describe "Timelock" do
 
   end
 
+  private 
+  def known_answer_test thread_count
+    extend Utils
+    seed = Array.new
+    thread_count.times { seed << known_answers[:input]}
+    generator = SHA256Puzzle.new({:iterations => 1, :threads => thread_count})
+    generator.generate(seed)
+    (0..thread_count).each do |i|
+      known_answers[:input].should == generator.puzzle[:seed][i-1]
+      known_answers[:output].should == bin_to_hex(generator.puzzle[:key][i-1])
+    end
+  end
 end

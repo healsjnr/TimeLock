@@ -3,14 +3,36 @@ require 'openssl'
 
 class SHA256Puzzle < Puzzle
 
-  def generate(seed = OpenSSL::Random.random_bytes(32))
-    # seed actually needs to be passed in as an array. If not provided we need to 
-    # we need to creat seeds for each thread generating data. 
-    @puzzle[:seed] = Array.new([seed])
-    sha256 = OpenSSL::Digest::SHA256.new
-    @key = do_hash_iterations @params[:iterations], @puzzle[:seed][0]
+	# Probably need to refactor this so that threads is passed into the generate method. 
+	# as it's not needed outside of generate
+
+	# Also need to add a new param value for the encryption algorithm used to encrypt successive hashed. 
+
+  def generate(seed)
+    
+    threads = []
+    @params[:threads].times do |i|
+    	threads[i] = Thread.new {
+    		Thread.current[:seed] = seed[i] || OpenSSL::Random.random_bytes(32)
+    		Thread.current[:key] = do_hash_iterations @params[:iterations], Thread.current[:seed]
+    	}
+    end
+
+    @puzzle[:seed] = Array.new
+
+    # shouldn't really be storing key on puzzle. It should be a separate attribute.
+    @puzzle[:key] = Array.new
+
+    threads.each_with_index do |t, i| 
+    	t.join
+    	@puzzle[:seed][i] = t[:seed]
+    	@puzzle[:key][i] = t[:key]
+    end
+
+    # do encryption of each key
+
     @puzzle
-  end
+   end
 
   def solve(puzzle)
     @puzzle = puzzle
