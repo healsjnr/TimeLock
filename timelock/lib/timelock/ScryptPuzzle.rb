@@ -1,5 +1,4 @@
-$:.unshift File.dirname(__FILE__)
-require 'openssl'
+2require 'openssl'
 
 class ScryptPuzzle < Puzzle
 

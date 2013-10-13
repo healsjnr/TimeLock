@@ -1,5 +1,3 @@
-$:.unshift File.dirname(__FILE__)
-
 class Puzzle
 
   class << self
@@ -9,6 +7,17 @@ class Puzzle
   end
 
   attr_reader :params, :puzzle, :key
+
+  # The following defines the interface for Puzzle class. All subclass must implement
+  # these methods
+  [:generate, :solve].each do |m| 
+    "defining method #{m}"
+    self.class_eval do
+      define_method(m) do |*args|
+        raise 'Method not implemented'
+      end
+    end
+  end
 
   def initialize params
     @params = params

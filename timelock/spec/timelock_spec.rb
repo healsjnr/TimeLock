@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe "Timelock" do
 
   it 'should instantiate a valid SHA256 puzzle' do 
-    puzzle = TimeLock.new_puzzle :sha256, :iterations => 1, :threads => 1 
+    puzzle = TimeLock.new_puzzle :sha256, :iterations => 1, :threads => 1, :encryption => :aes_256_gcm
   end
  
   it 'should instantiate a valid scrypt puzzle' do
@@ -31,10 +31,36 @@ describe "Timelock" do
       
     end
 
+    it 'should generate then solve' do
+      sha256 = SHA256Puzzle.new({:iterations => 1000, :threads => 4, :encryption => :aes_256_gcm})
+      puzzle = sha256.generate
+      key = sha256.key
+      result = sha256.solve(puzzle)
+      result.should == key
+    end
+
+    it 'should take longer to solve then generate' do
+      sha256 = SHA256Puzzle.new({:iterations => 100000, :threads => 4, :encryption => :aes_256_gcm})
+      start_gen = Time.now
+      puzzle = sha256.generate
+      puzzle_gen = Time.now - start_gen
+
+      start_solve = Time.now
+      key = sha256.solve puzzle
+      puzzle_solve = Time.now - start_solve
+
+      puts "Generation time: #{puzzle_gen}"
+      puts "Solve time: #{puzzle_solve}"
+
+      puzzle_solve.should > puzzle_gen  
+
+    end
+
     it 'should solve the puzzle' do
       extend Utils
       puzzle = {:seed => [known_answers[:input]]}
-      solver = SHA256Puzzle.new({:iterations => 1})
+      solver = SHA256Puzzle.new({:iterations => 1, :threads => 1, :encryption => :aes_256_gcm})
+      result = solver.solve(puzzle)
       known_answers[:output].should == bin_to_hex(solver.solve(puzzle))
     end
 
@@ -45,11 +71,12 @@ describe "Timelock" do
     extend Utils
     seed = Array.new
     thread_count.times { seed << known_answers[:input]}
-    generator = SHA256Puzzle.new({:iterations => 1, :threads => thread_count})
-    generator.generate(seed)
+    generator = SHA256Puzzle.new({:iterations => 1, :threads => thread_count, :encryption => :aes_256_gcm})
+    puzzle = generator.generate(seed)
+    puzzle.should == generator.puzzle
     (0..thread_count).each do |i|
-      known_answers[:input].should == generator.puzzle[:seed][i-1]
-      known_answers[:output].should == bin_to_hex(generator.puzzle[:key][i-1])
+      known_answers[:input].should == puzzle[:seed][i-1]
     end
+    known_answers[:output].should == bin_to_hex(generator.key)
   end
 end
