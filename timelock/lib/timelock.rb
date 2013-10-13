@@ -8,17 +8,11 @@ class TimeLockError < StandardError; end
 
 class TimeLock
 
-	VALID_ALGORITHMS = [:SHA256, :Scrypt, :Squaring]
+	VALID_ALGORITHMS = Puzzle.algorithms.keys
 
 	def self.new_puzzle algorithm, params
-		raise TimeLockError.new("Inavlid algorithm: #{algorithm}") unless VALID_ALGORITHMS.include? algorithm
-		begin
-			klass = Kernel.const_get("#{algorithm.to_s}Puzzle")
-			raise TimeLockError.new("Unexpected error, class does not exist: #{algorithm}") unless klass.is_a?(Class)
-			klass.new params
-		rescue NameError
-			raise TimeLockError.new("Unexpected error, class name not found: #{algorithm}Puzzle")
-		end
+	  raise TimeLockError.new("Inavlid algorithm: #{algorithm}") unless VALID_ALGORITHMS.include? algorithm
+		Puzzle.algorithms[algorithm].new params
 	end
 
 end
