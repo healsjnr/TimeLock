@@ -1,4 +1,4 @@
-2require 'openssl'
+require 'openssl'
 
 class ScryptPuzzle < Puzzle
 

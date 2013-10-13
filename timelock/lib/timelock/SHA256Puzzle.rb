@@ -1,4 +1,3 @@
-$:.unshift File.dirname(__FILE__)
 require 'openssl'
 
 class SHA256Puzzle < Puzzle
@@ -47,7 +46,7 @@ class SHA256Puzzle < Puzzle
   #               are encrypted with the result of hashing the previous seed @params[:iteraiton] times.
   def solve(puzzle)
     puzzle[:seed].inject(nil) do |prev, s|
-      seed = decrypt s, prev unless prev = nil
+      seed = prev.nil? ? s : decrypt(s, prev)
       do_hash_iterations @params[:iterations], seed
     end
   end
