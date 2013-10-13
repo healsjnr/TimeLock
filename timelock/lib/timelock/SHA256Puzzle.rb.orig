@@ -1,8 +1,8 @@
-$:.unshift File.dirname(__FILE__)
 require 'openssl'
 
 class SHA256Puzzle < Puzzle
 
+<<<<<<< HEAD
   ENCRYPTION_ALGS = [:aes_256_gcm]
 
   def initialize(params)
@@ -12,6 +12,10 @@ class SHA256Puzzle < Puzzle
     super
   end
 
+=======
+  # Probably need to refactor this so that threads is passed into the generate method. 
+  # as it's not needed outside of generate
+>>>>>>> 8c4bbba6602a4a137d8b0457dbd666fd382d8a23
   # Also need to add a new param value for the encryption algorithm used to encrypt successive hashed. 
   def generate(seed=nil)
     
@@ -20,8 +24,13 @@ class SHA256Puzzle < Puzzle
     threads = []
     @params[:threads].times do |i|
       threads[i] = Thread.new {
+<<<<<<< HEAD
         Thread.current[:seed] = seed.nil? ? OpenSSL::Random.random_bytes(32) : seed[i]
         Thread.current[:result] = do_hash_iterations @params[:iterations], Thread.current[:seed]
+=======
+        Thread.current[:seed] = seed[i] || OpenSSL::Random.random_bytes(32)
+        Thread.current[:key] = do_hash_iterations @params[:iterations], Thread.current[:seed]
+>>>>>>> 8c4bbba6602a4a137d8b0457dbd666fd382d8a23
       }
     end
 
@@ -30,10 +39,15 @@ class SHA256Puzzle < Puzzle
 
     threads.each_with_index do |t, i| 
       t.join
+<<<<<<< HEAD
       # we use the previous threads result to encrypt the current seed. 
       key = i != 0 ? results[i-1] : nil
       @puzzle[:seed][i] = encrypt t[:seed], key
       results[i] = t[:result]
+=======
+      @puzzle[:seed][i] = t[:seed]
+      @puzzle[:key][i] = t[:key]
+>>>>>>> 8c4bbba6602a4a137d8b0457dbd666fd382d8a23
     end
 
     # The key is the final result. 
@@ -61,6 +75,7 @@ class SHA256Puzzle < Puzzle
       sha256.digest
     end
   end
+<<<<<<< HEAD
 
   def encrypt data, key
     data
@@ -70,3 +85,6 @@ class SHA256Puzzle < Puzzle
     data
   end
 end
+=======
+end
+>>>>>>> 8c4bbba6602a4a137d8b0457dbd666fd382d8a23
