@@ -8,7 +8,7 @@ class SHA256Puzzle < Puzzle
 
 	# Also need to add a new param value for the encryption algorithm used to encrypt successive hashed. 
 
-  def generate(seed)
+  def generate(seed=nil)
     
     threads = []
     @params[:threads].times do |i|
