@@ -3,19 +3,17 @@ require 'openssl'
 
 class SHA256Puzzle < Puzzle
 
-	# Probably need to refactor this so that threads is passed into the generate method. 
-	# as it's not needed outside of generate
-
-	# Also need to add a new param value for the encryption algorithm used to encrypt successive hashed. 
-
+  # Probably need to refactor this so that threads is passed into the generate method. 
+  # as it's not needed outside of generate
+  # Also need to add a new param value for the encryption algorithm used to encrypt successive hashed. 
   def generate(seed=nil)
     
     threads = []
     @params[:threads].times do |i|
-    	threads[i] = Thread.new {
-    		Thread.current[:seed] = seed[i] || OpenSSL::Random.random_bytes(32)
-    		Thread.current[:key] = do_hash_iterations @params[:iterations], Thread.current[:seed]
-    	}
+      threads[i] = Thread.new {
+        Thread.current[:seed] = seed[i] || OpenSSL::Random.random_bytes(32)
+        Thread.current[:key] = do_hash_iterations @params[:iterations], Thread.current[:seed]
+      }
     end
 
     @puzzle[:seed] = Array.new
@@ -24,9 +22,9 @@ class SHA256Puzzle < Puzzle
     @puzzle[:key] = Array.new
 
     threads.each_with_index do |t, i| 
-    	t.join
-    	@puzzle[:seed][i] = t[:seed]
-    	@puzzle[:key][i] = t[:key]
+      t.join
+      @puzzle[:seed][i] = t[:seed]
+      @puzzle[:key][i] = t[:key]
     end
 
     # do encryption of each key
