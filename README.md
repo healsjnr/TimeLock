@@ -21,3 +21,9 @@ Test
 
     $ bundle install
     $ bundle exec rake spec
+
+Play Around:
+
+    $ bundle exec ruby lib/timelock.rb
+
+This will load a pry session and you can use the classes directly.
