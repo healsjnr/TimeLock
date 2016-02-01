@@ -17,3 +17,17 @@ class TimeLock
 
 end
 
+def time_lock_help
+ puts "puzzle = TimeLock.new_puzzle :sha256, :iterations => 1, :threads => 1, :encryption => :aes_256_gcm"
+ puts "seed = puzzle.generate"
+ puts "key = puzzle.key"
+ puts "solution = puzzle.solve(seed)"
+ puts "solution == key"
+end
+
+# > help # print usage.
+if __FILE__ == $0
+  require 'pry'
+  binding.pry
+end
+
